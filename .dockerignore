@@ -1,3 +1,4 @@
+docker-compose.yml
 .env
 k8s/docker-config.json
-deploy.sh
+k8s/

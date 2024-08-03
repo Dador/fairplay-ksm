@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fairplay-ksm
+spec:
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: fairplay-ksm
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fairplay-ksm
+  labels:
+    app: fairplay-ksm
+spec:
+  selector:
+    matchLabels:
+      app: fairplay-ksm
+  template:
+    metadata:
+      labels:
+        app: fairplay-ksm
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - r9
+      containers:
+        - name: fairplay-ksm
+          image: ghcr.io/Dador/fairplay-ksm
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: fairplay-ksm-env
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "0m"
+            limits:
+              memory: "1024Mi"
+              cpu: "1000m"
+      imagePullSecrets:
+        - name: github
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fairplay-ksm-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-production
+spec:
+  rules:
+    - host: fairplay-ksm.metal1.getinfura.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fairplay-ksm
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - fairplay-ksm.metal1.getinfura.com
+      secretName: fairplay-ksm-tls-cert

@@ -1,0 +1,24 @@
+apiVersion: skaffold/v4beta10
+kind: Config
+metadata:
+  name: fairplay-ksm
+build:
+  platforms: ["linux/amd64"]
+  artifacts:
+    - image: ghcr.io/Dador/fairplay-ksm
+      context: .
+      docker:
+        dockerfile: ./Dockerfile
+  local:
+    push: true
+    useBuildkit: true
+    concurrency: 5
+manifests:
+  kustomize:
+    paths:
+      - k8s/
+    buildArgs:
+      - --load-restrictor LoadRestrictionsNone
+deploy:
+  kubectl:
+    defaultNamespace: "{{.NAMESPACE}}"

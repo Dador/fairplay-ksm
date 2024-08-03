@@ -45,18 +45,11 @@ func main() {
 		AllowMethods: []string{http.MethodGet, http.MethodHead, http.MethodPost},
 	}))
 
-	k := &ksm.Ksm{
-		Pub: ReadPublicCert(),
-		Pri: ReadPriKey(),
-		Rck: ksm.RandomContentKey{}, //NOTE: Don't use ramdom key in your application.
-		Ask: ReadASk(),
-	}
-
 	e.GET("/", func(ctx echo.Context) error {
 		return ctx.String(http.StatusOK, "OK")
 	})
 	e.POST("/fps/license", func(ctx echo.Context) error {
-		token := ctx.QueryParam("token")
+		token := ctx.Request().Header.Get("Auth-Code")
 		fairplayAccessToken := os.Getenv("FAIRPLAY_ACCESS_TOKEN")
 
 		if token != fairplayAccessToken {
@@ -96,6 +89,16 @@ func main() {
 				panic(err)
 			}
 			playback = decoded
+		}
+
+		key := ctx.Request().Header.Get("key")
+		iv := ctx.Request().Header.Get("iv")
+
+		k := &ksm.Ksm{
+			Pub: ReadPublicCert(),
+			Pri: ReadPriKey(),
+			Rck: HeaderContentKey{Key: key, Iv: iv},
+			Ask: ReadASk(),
 		}
 
 		ckc, err := k.GenCKC(playback)

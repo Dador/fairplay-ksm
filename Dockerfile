@@ -1,4 +1,4 @@
-FROM golang:1.13-stretch AS builder
+FROM golang:1.17.13-buster AS builder
 
 WORKDIR /app
 COPY . /app
@@ -7,14 +7,15 @@ COPY . /app
 WORKDIR /app/ksm
 RUN go get -u -t ./... && go test -run ''
 
-WORKDIR /app/crypto
+WORKDIR /app/cryptos
 RUN go get -u -t ./... && go test -run ''
 
 # Build
 WORKDIR /app
-RUN go build -o /app/ksm-server . && chmod 755 /app/ksm-server
+# ENTRYPOINT ["tail", "-f", "/dev/null"]
+RUN go build -o /app/ksm-server ./api && chmod 755 /app/ksm-server
 
-FROM debian:stretch-slim
+FROM debian:buster-slim
 WORKDIR /app
 COPY --from=builder /app/ksm-server .
 

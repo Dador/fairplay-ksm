@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cooomma/fairplay-ksm/cryptos"
-	"github.com/cooomma/fairplay-ksm/ksm"
+	"github.com/Dador/fairplay-ksm/cryptos"
+	"github.com/Dador/fairplay-ksm/ksm"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -56,6 +56,13 @@ func main() {
 		return ctx.String(http.StatusOK, "OK")
 	})
 	e.POST("/fps/license", func(ctx echo.Context) error {
+		token := ctx.QueryParam("token")
+		fairplayAccessToken := os.Getenv("FAIRPLAY_ACCESS_TOKEN")
+
+		if token != fairplayAccessToken {
+			return ctx.JSON(http.StatusForbidden, &ErrorMessage{Status: 403, Message: "Forbidden"})
+		}
+
 		spcMessage := new(SpcMessage)
 		var playback []byte
 		var base64EncodingMethod string

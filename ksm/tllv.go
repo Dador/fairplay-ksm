@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/cooomma/fairplay-ksm/logger"
+	"github.com/Dador/fairplay-ksm/logger"
 )
 
 // TLLVBlock represents a TLLV block structure.

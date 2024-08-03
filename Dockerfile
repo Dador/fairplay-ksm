@@ -1,4 +1,5 @@
 FROM golang:1.17.13-buster AS builder
+LABEL org.opencontainers.image.source https://github.com/Dador/fairplay-ksm
 
 WORKDIR /app
 COPY . /app
